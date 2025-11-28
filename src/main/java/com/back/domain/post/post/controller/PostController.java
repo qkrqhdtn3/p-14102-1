@@ -10,7 +10,7 @@ public class PostController {
     @ResponseBody
     public String write(){
         return """
-                <form action="http://localhost:8080/posts/dowRite">
+                <form action="doWrite">
                     <input type="text" name="title" placeholder="제목"
                      value="안녕">
                     <br>
