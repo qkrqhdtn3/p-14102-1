@@ -2,8 +2,11 @@ package com.back.domain.post.post.controller;
 
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@Validated
 public class PostController {
     private final PostService postService;
 
@@ -57,23 +59,24 @@ public class PostController {
         return getWriteFormHtml();
     }
 
+    @AllArgsConstructor
+    @Getter
+    public static class WriteForm {
+        @NotBlank
+        @Size(min = 2, max = 20)
+        private String title;
+        @NotBlank
+        @Size(min = 2, max = 20)
+        private String content;
+    }
+
     @PostMapping("/posts/doWrite")
     @ResponseBody
     @Transactional
     public String write(
-            @NotBlank
-            @Size(min = 2, max = 20)
-            @RequestParam(defaultValue = "")
-            String title,
-            @NotBlank
-            @Size(min = 2, max = 100)
-            @RequestParam(defaultValue = "")
-            String content
+            @Valid WriteForm form
     ) {
-        if (title.isBlank()) return getWriteFormHtml("title", "제목을 입력해주세요", title, content);
-        if (content.isBlank()) return getWriteFormHtml("content", "내용을 입력해주세요.", title, content);
-
-        Post post = postService.write(title, content);
+        Post post = postService.write(form.getTitle(), form.getContent());
 
         return "%d번 게시글 생성".formatted(post.getId());
     }
