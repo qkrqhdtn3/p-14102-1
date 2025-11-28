@@ -13,22 +13,39 @@ public class PostController {
     private final PostService postService;
 
     private String getWriteFormHtml(){
-        return getWriteFormHtml("");
+        return getWriteFormHtml("", "", "", "");
     }
 
-    private String getWriteFormHtml(String errorMessage){
+    private String getWriteFormHtml(
+            String errorFieldName,
+            String errorMessage,
+            String title,
+            String content
+    ){
         return """
                 <div style="color: red;">%s</div>
                 
                 <form method="POST" action="doWrite">
                     <input type="text" name="title" placeholder="제목"
-                     value="">
+                     value="%s" autofocus>
                     <br>
-                    <textarea name="content" placeholder="내용"></textarea>
+                    <textarea name="content" placeholder="내용">%s</textarea>
                     <br>
                     <input type="submit" value="작성">
                 </form>
-                """.formatted(errorMessage);
+                
+                <script>
+                const errorFiledName = '%s';
+                
+                if(errorFiledName.length > 0)
+                {
+                    const forms = document.querySelectorAll('form');
+                    const lastForm = forms[forms.length - 1];
+                    
+                    lastForm[errorFieldName].focus();
+                }
+                </script>
+                """.formatted(errorMessage, title, content, errorFieldName);
     }
     @GetMapping("/posts/write")
     @ResponseBody
@@ -43,8 +60,8 @@ public class PostController {
             @RequestParam(defaultValue = "") String title,
             @RequestParam(defaultValue = "") String content
     ) {
-        if (title.isBlank()) return getWriteFormHtml("제목을 입력해주세요");
-        if (content.isBlank()) return getWriteFormHtml("내용을 입력해주세요.");
+        if (title.isBlank()) return getWriteFormHtml("title", "제목을 입력해주세요", title, content);
+        if (content.isBlank()) return getWriteFormHtml("content", "내용을 입력해주세요.", title, content);
 
         Post post = postService.write(title, content);
 
